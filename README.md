@@ -76,8 +76,6 @@ The aggregation cases compare the old and new end-to-end Lodestar beacon-node pa
 Sample output from my machine:
 
 ```
-➜ pnpm bench
-$ node --expose-gc --import tsx src/benchmark.ts
 Generating deterministic valid BLS public keys...
 {
   node: 'v24.18.0',
@@ -89,22 +87,22 @@ Generating deterministic valid BLS public keys...
 ┌─────────┬──────────────┬──────────┬─────────────┐
 │ (index) │ cache        │ totalMs  │ nsPerLookup │
 ├─────────┼──────────────┼──────────┼─────────────┤
-│ 0       │ 'TypeScript' │ '1.722'  │ '105.1'     │
-│ 1       │ 'Zig native' │ '12.935' │ '789.5'     │
+│ 0       │ 'TypeScript' │ '1.809'  │ '110.4'     │
+│ 1       │ 'Zig native' │ '13.653' │ '833.3'     │
 └─────────┴──────────────┴──────────┴─────────────┘
 ┌─────────┬────────────────────────────────────────────────────┬───────────────────┬───────────────────┬────────────────────────┬────────────────────────┬──────────┐
 │ (index) │ Task name                                          │ Latency avg (ns)  │ Latency med (ns)  │ Throughput avg (ops/s) │ Throughput med (ops/s) │ Samples  │
 ├─────────┼────────────────────────────────────────────────────┼───────────────────┼───────────────────┼────────────────────────┼────────────────────────┼──────────┤
-│ 0       │ 'BLS indexed getOrThrow - TypeScript'              │ '30.34 ± 0.46%'   │ '41.00 ± 1.00'    │ '26568958 ± 0.01%'     │ '24390243 ± 580719'    │ 32963608 │
-│ 1       │ 'BLS indexed getOrThrow - Zig native'              │ '69.34 ± 0.09%'   │ '83.00 ± 1.00'    │ '16835323 ± 0.02%'     │ '12048193 ± 143431'    │ 14422082 │
-│ 2       │ 'BLS aggregatePublicKeys 1 - TypeScript cache'     │ '896.09 ± 11.97%' │ '667.00 ± 41.00'  │ '1481316 ± 0.02%'      │ '1499250 ± 86821'      │ 1115960  │
-│ 3       │ 'BLS nativeCache.aggregate 1 - Zig native cache'   │ '51.58 ± 0.12%'   │ '42.00 ± 0.00'    │ '21371084 ± 0.01%'     │ '23809524 ± 4'         │ 19386873 │
-│ 4       │ 'BLS aggregatePublicKeys 32 - TypeScript cache'    │ '20318 ± 0.15%'   │ '19875 ± 375.00'  │ '49654 ± 0.06%'        │ '50314 ± 968'          │ 49218    │
-│ 5       │ 'BLS nativeCache.aggregate 32 - Zig native cache'  │ '17739 ± 0.30%'   │ '17041 ± 166.00'  │ '57155 ± 0.06%'        │ '58682 ± 577'          │ 56375    │
-│ 6       │ 'BLS aggregatePublicKeys 128 - TypeScript cache'   │ '74494 ± 0.86%'   │ '71833 ± 1125.0'  │ '13670 ± 0.12%'        │ '13921 ± 215'          │ 13424    │
-│ 7       │ 'BLS nativeCache.aggregate 128 - Zig native cache' │ '62608 ± 0.13%'   │ '61000 ± 1417.0'  │ '16055 ± 0.10%'        │ '16393 ± 390'          │ 15973    │
-│ 8       │ 'BLS mixed 32 signature sets - TypeScript'         │ '377256 ± 0.31%'  │ '372250 ± 7625.0' │ '2661 ± 0.19%'         │ '2686 ± 55'            │ 2651     │
-│ 9       │ 'BLS mixed 32 signature sets - Zig native'         │ '319348 ± 0.17%'  │ '316250 ± 7229.0' │ '3137 ± 0.14%'         │ '3162 ± 72'            │ 3132     │
+│ 0       │ 'BLS indexed getOrThrow - TypeScript'              │ '32.86 ± 0.08%'   │ '42.00 ± 0.00'    │ '25387953 ± 0.00%'     │ '23809524 ± 1'         │ 30428255 │
+│ 1       │ 'BLS indexed getOrThrow - Zig native'              │ '70.83 ± 0.05%'   │ '83.00 ± 1.00'    │ '16079077 ± 0.02%'     │ '12048193 ± 143431'    │ 14117959 │
+│ 2       │ 'BLS aggregatePublicKeys 1 - TypeScript cache'     │ '808.87 ± 10.27%' │ '666.00 ± 41.00'  │ '1517176 ± 0.02%'      │ '1501502 ± 98498'      │ 1236300  │
+│ 3       │ 'BLS nativeCache.aggregate 1 - Zig native cache'   │ '55.23 ± 0.05%'   │ '42.00 ± 1.00'    │ '20206877 ± 0.01%'     │ '23809524 ± 580720'    │ 18106237 │
+│ 4       │ 'BLS aggregatePublicKeys 32 - TypeScript cache'    │ '19791 ± 0.06%'   │ '19500 ± 125.00'  │ '50667 ± 0.04%'        │ '51282 ± 331'          │ 50530    │
+│ 5       │ 'BLS nativeCache.aggregate 32 - Zig native cache'  │ '17200 ± 0.07%'   │ '16959 ± 43.00'   │ '58349 ± 0.04%'        │ '58966 ± 150'          │ 58140    │
+│ 6       │ 'BLS aggregatePublicKeys 128 - TypeScript cache'   │ '70668 ± 0.06%'   │ '69875 ± 250.00'  │ '14166 ± 0.05%'        │ '14311 ± 51'           │ 14151    │
+│ 7       │ 'BLS nativeCache.aggregate 128 - Zig native cache' │ '60329 ± 0.07%'   │ '59667 ± 125.00'  │ '16602 ± 0.05%'        │ '16760 ± 35'           │ 16576    │
+│ 8       │ 'BLS mixed 32 signature sets - TypeScript'         │ '366449 ± 0.13%'  │ '362791 ± 4499.0' │ '2731 ± 0.10%'         │ '2756 ± 35'            │ 2729     │
+│ 9       │ 'BLS mixed 32 signature sets - Zig native'         │ '311191 ± 0.21%'  │ '308125 ± 1125.0' │ '3217 ± 0.08%'         │ '3245 ± 12'            │ 3214     │
 └─────────┴────────────────────────────────────────────────────┴───────────────────┴───────────────────┴────────────────────────┴────────────────────────┴──────────┘
 ```
 
