@@ -75,7 +75,44 @@ measure the changed end-to-end Lodestar beacon-node path.
 
 ## Results
 
-The following results are from one run on 2026-08-05. Lower latency is better. The tables show average
+Sample output from my machine:
+
+```
+➜ pnpm bench
+$ node --expose-gc --import tsx src/benchmark.ts
+Generating deterministic valid BLS public keys...
+{
+  node: 'v24.18.0',
+  platform: 'darwin-arm64',
+  cacheSize: 16384,
+  benchmarkTime: 1000,
+  warmupTime: 250
+}
+┌─────────┬──────────────┬──────────┬─────────────┐
+│ (index) │ cache        │ totalMs  │ nsPerLookup │
+├─────────┼──────────────┼──────────┼─────────────┤
+│ 0       │ 'TypeScript' │ '1.741'  │ '106.3'     │
+│ 1       │ 'Zig native' │ '12.552' │ '766.1'     │
+└─────────┴──────────────┴──────────┴─────────────┘
+┌─────────┬───────────────────────────────────────────────┬───────────────────┬───────────────────┬────────────────────────┬────────────────────────┬──────────┐
+│ (index) │ Task name                                     │ Latency avg (ns)  │ Latency med (ns)  │ Throughput avg (ops/s) │ Throughput med (ops/s) │ Samples  │
+├─────────┼───────────────────────────────────────────────┼───────────────────┼───────────────────┼────────────────────────┼────────────────────────┼──────────┤
+│ 0       │ 'BLS indexed getOrThrow - TypeScript'         │ '30.58 ± 0.07%'   │ '41.00 ± 1.00'    │ '26411268 ± 0.01%'     │ '24390243 ± 580719'    │ 32697574 │
+│ 1       │ 'BLS indexed getOrThrow - Zig native'         │ '71.00 ± 0.06%'   │ '83.00 ± 1.00'    │ '16157931 ± 0.02%'     │ '12048193 ± 143431'    │ 14085150 │
+│ 2       │ 'BLS JS aggregate 1 - TypeScript cache'       │ '918.93 ± 15.26%' │ '667.00 ± 1.00'   │ '1459138 ± 0.02%'      │ '1499250 ± 2251'       │ 1088223  │
+│ 3       │ 'BLS JS aggregate 1 - Zig native cache'       │ '873.27 ± 11.16%' │ '708.00 ± 1.00'   │ '1410120 ± 0.02%'      │ '1412429 ± 1992'       │ 1145116  │
+│ 4       │ 'BLS native aggregate 1 - Zig native cache'   │ '57.04 ± 0.15%'   │ '42.00 ± 1.00'    │ '19842768 ± 0.01%'     │ '23809524 ± 580720'    │ 17531291 │
+│ 5       │ 'BLS JS aggregate 32 - TypeScript cache'      │ '20261 ± 0.09%'   │ '19833 ± 167.00'  │ '49593 ± 0.05%'        │ '50421 ± 428'          │ 49356    │
+│ 6       │ 'BLS JS aggregate 32 - Zig native cache'      │ '20865 ± 0.27%'   │ '20250 ± 125.00'  │ '48427 ± 0.06%'        │ '49383 ± 307'          │ 47927    │
+│ 7       │ 'BLS native aggregate 32 - Zig native cache'  │ '17231 ± 0.09%'   │ '16958 ± 83.00'   │ '58301 ± 0.04%'        │ '58969 ± 290'          │ 58036    │
+│ 8       │ 'BLS JS aggregate 128 - TypeScript cache'     │ '73337 ± 2.37%'   │ '71000 ± 292.00'  │ '13829 ± 0.07%'        │ '14085 ± 58'           │ 13636    │
+│ 9       │ 'BLS JS aggregate 128 - Zig native cache'     │ '76246 ± 0.09%'   │ '74292 ± 751.00'  │ '13146 ± 0.08%'        │ '13460 ± 137'          │ 13116    │
+│ 10      │ 'BLS native aggregate 128 - Zig native cache' │ '66863 ± 3.25%'   │ '59750 ± 208.00'  │ '16148 ± 0.17%'        │ '16736 ± 58'           │ 14956    │
+│ 11      │ 'BLS mixed 32 signature sets - TypeScript'    │ '372075 ± 0.13%'  │ '369334 ± 7082.5' │ '2691 ± 0.12%'         │ '2708 ± 52'            │ 2688     │
+│ 12      │ 'BLS mixed 32 signature sets - Zig native'    │ '324551 ± 0.95%'  │ '315313 ± 7562.5' │ '3126 ± 0.24%'         │ '3171 ± 78'            │ 3082     │
+```
+
+The following results are from one run. Lower latency is better. The tables show average
 latency. Results can change with CPU load, temperature, and runtime versions.
 
 ### Hardware and software
