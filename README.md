@@ -49,29 +49,15 @@ pnpm bench | tee "results/$(date +%Y-%m-%d).txt"
 Run benchmarks on an idle machine. Use the same Node.js version, CPU power mode, and thermal state when you
 compare results. The native cache is process-wide, so do not run benchmark cases concurrently in one process.
 
-
-## Scope
-
-The benchmarks focus on the cache operations used to resolve Lodestar BLS signature sets:
-
-- Indexed signature set: `getOrThrow(index)`.
-- Old aggregate signature path: `indices.map(getOrThrow)` followed by `aggregatePublicKeys`.
-- New aggregate signature path: `nativeCache.aggregate(indices)`.
-- A mixed batch of 32 indexed and aggregate signature sets that compares the old TypeScript path with the
-  optimized native path.
-
-Aggregate sizes are 1, 32, and 128. Lodestar's existing BLS performance tests describe 128 as a typical
-mainnet attestation maximum. The mixed workload contains 24 indexed sets, four 32-key aggregate sets, and
-four 128-key aggregate sets.
-
-The script also reports a one-shot first pass over all entries. The native JavaScript wrapper lazily caches
-`PublicKey` objects returned by Zig. The steady-state benchmark runs after this first pass, so both caches
-return already-deserialized objects for indexed lookups.
-
-Cache population, `getIndex`, persistence, capacity management, and reset are outside the measured BLS path.
-The aggregation cases compare the old and new end-to-end Lodestar beacon-node paths.
-
 ## Results
+
+### Summary
+
+- Slower: The first native `getOrThrow()` pass was 7.5x slower.
+- Slower: A warm native `getOrThrow()` was 2.3x slower, or about 39 ns slower.
+- Faster: Native aggregation of 32 keys had 13% lower latency.
+- Faster: Native aggregation of 128 keys had 16% lower latency.
+- Faster: The [native mixed workload](#mixed-bls-workload) had 15% lower latency and 18% higher throughput.
 
 Sample output from my machine:
 
@@ -106,25 +92,27 @@ Generating deterministic valid BLS public keys...
 └─────────┴────────────────────────────────────────────────────┴───────────────────┴───────────────────┴────────────────────────┴────────────────────────┴──────────┘
 ```
 
-The following results are from one run. Lower latency is better. The tables show average
-latency. Results can change with CPU load, temperature, and runtime versions.
+## Methodology
 
-### Hardware and software
+The benchmarks focus on the cache operations used to resolve Lodestar BLS signature sets:
 
-| Item | Value |
-| --- | --- |
-| Machine | Apple `Mac14,9` |
-| CPU | Apple M2 Pro, 8 performance cores and 4 efficiency cores |
-| Memory | 32 GiB |
-| Power | AC power |
-| Architecture | arm64 |
-| Operating system | macOS 15.5 |
-| Node.js | 24.18.0 |
-| pnpm | 11.0.0 |
-| Zig | 0.16.0 |
-| Cache size | 16,384 public keys |
-| Measurement time | 1,000 ms per case |
-| Warmup time | 250 ms per case |
+- Indexed signature set: `getOrThrow(index)`.
+- Old aggregate signature path: `indices.map(getOrThrow)` followed by `aggregatePublicKeys`.
+- New aggregate signature path: `nativeCache.aggregate(indices)`.
+- A mixed batch of 32 indexed and aggregate signature sets that compares the old TypeScript path with the
+  optimized native path.
+
+Aggregate sizes are 1, 32, and 128. Lodestar's existing BLS performance tests describe 128 as a typical
+mainnet attestation maximum. The mixed workload contains 24 indexed sets, four 32-key aggregate sets, and
+four 128-key aggregate sets.
+
+The script also reports a one-shot first pass over all entries. The native JavaScript wrapper lazily caches
+`PublicKey` objects returned by Zig. The steady-state benchmark runs after this first pass, so both caches
+return already-deserialized objects for indexed lookups.
+
+Cache population, `getIndex`, persistence, capacity management, and reset are outside the measured BLS path.
+The aggregation cases compare the old and new end-to-end Lodestar beacon-node paths.
+
 
 ### First indexed lookup pass
 
@@ -178,13 +166,24 @@ aggregate sets.
 The native path reduced average mixed-workload latency by approximately 15% and increased throughput by
 approximately 18%.
 
-### Summary
+### Hardware and software
 
-- Slower: The first native `getOrThrow()` pass was 7.5x slower.
-- Slower: A warm native `getOrThrow()` was 2.3x slower, or about 39 ns slower.
-- Faster: Native aggregation of 32 keys had 13% lower latency.
-- Faster: Native aggregation of 128 keys had 16% lower latency.
-- Faster: The native mixed workload had 15% lower latency and 18% higher throughput.
+| Item | Value |
+| --- | --- |
+| Machine | Apple `Mac14,9` |
+| CPU | Apple M2 Pro, 8 performance cores and 4 efficiency cores |
+| Memory | 32 GiB |
+| Power | AC power |
+| Architecture | arm64 |
+| Operating system | macOS 15.5 |
+| Node.js | 24.18.0 |
+| pnpm | 11.0.0 |
+| Zig | 0.16.0 |
+| Cache size | 16,384 public keys |
+| Measurement time | 1,000 ms per case |
+| Warmup time | 250 ms per case |
+
+
 
 ## Implementation sources
 
