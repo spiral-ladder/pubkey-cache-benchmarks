@@ -180,9 +180,11 @@ approximately 18%.
 
 ### Summary
 
-Individual indexed lookups are slower through the native wrapper. The aggregation gain in Lodestar
-[#9728](https://github.com/ChainSafe/lodestar/pull/9728) comes from `aggregate(indices)`, which keeps public-key
-lookup and aggregation inside Zig and avoids returning every key through JavaScript.
+- Slower: The first native `getOrThrow()` pass was 7.5x slower.
+- Slower: A warm native `getOrThrow()` was 2.3x slower, or about 39 ns slower.
+- Faster: Native aggregation of 32 keys had 13% lower latency.
+- Faster: Native aggregation of 128 keys had 16% lower latency.
+- Faster: The native mixed workload had 15% lower latency and 18% higher throughput.
 
 ## Implementation sources
 
