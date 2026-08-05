@@ -1,0 +1,3 @@
+allowBuilds:
+  "@chainsafe/lodestar-z": true
+  esbuild: true
