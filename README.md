@@ -8,46 +8,14 @@ The dependency on `@chainsafe/lodestar-z` is pinned to the exact commit used by 
 [#9728](https://github.com/ChainSafe/lodestar/pull/9728):
 `b40c1c78f2e389320c7cdeea49a7485379d3b747`.
 
-## Scope
-
-The benchmarks focus on the cache operations used to resolve Lodestar BLS signature sets:
-
-- Indexed signature set: `getOrThrow(index)`.
-- Aggregate signature set, shared JavaScript path: `indices.map(getOrThrow)` followed by
-  `aggregatePublicKeys`, measured with each cache.
-- Aggregate signature set, optimized native path: `aggregate(indices)`.
-- A mixed batch of 32 indexed and aggregate signature sets that compares the old TypeScript path with the
-  optimized native path.
-
-Aggregate sizes are 1, 32, and 128. Lodestar's existing BLS performance tests describe 128 as a typical
-mainnet attestation maximum. The mixed workload contains 24 indexed sets, four 32-key aggregate sets, and
-four 128-key aggregate sets.
-
-The script also reports a one-shot first pass over all entries. The native JavaScript wrapper lazily caches
-`PublicKey` objects returned by Zig. The steady-state benchmark runs after this first pass, so both caches
-return already-deserialized objects for indexed lookups.
-
-Cache population, `getIndex`, persistence, capacity management, and reset are outside the measured BLS path.
-The shared JavaScript aggregation cases isolate cache lookup overhead. The optimized native aggregation cases
-measure the changed end-to-end Lodestar beacon-node path.
-
-## Requirements
-
-- Node.js 22 or later.
-- pnpm.
-- Zig compatible with the pinned lodestar-z revision. pnpm builds the native binding during installation.
-- A supported lodestar-z platform.
-
 ## Run
-
-From the repository root, install the dependencies:
 
 ```sh
 pnpm install
 ```
 
 The install builds the pinned lodestar-z native binding with the mainnet preset and `ReleaseSafe`
-optimization. The first install can take more than one minute.
+optimization.
 
 Run the type check and correctness tests:
 
@@ -80,6 +48,30 @@ pnpm bench | tee "results/$(date +%Y-%m-%d).txt"
 
 Run benchmarks on an idle machine. Use the same Node.js version, CPU power mode, and thermal state when you
 compare results. The native cache is process-wide, so do not run benchmark cases concurrently in one process.
+
+
+## Scope
+
+The benchmarks focus on the cache operations used to resolve Lodestar BLS signature sets:
+
+- Indexed signature set: `getOrThrow(index)`.
+- Aggregate signature set, shared JavaScript path: `indices.map(getOrThrow)` followed by
+  `aggregatePublicKeys`, measured with each cache.
+- Aggregate signature set, optimized native path: `aggregate(indices)`.
+- A mixed batch of 32 indexed and aggregate signature sets that compares the old TypeScript path with the
+  optimized native path.
+
+Aggregate sizes are 1, 32, and 128. Lodestar's existing BLS performance tests describe 128 as a typical
+mainnet attestation maximum. The mixed workload contains 24 indexed sets, four 32-key aggregate sets, and
+four 128-key aggregate sets.
+
+The script also reports a one-shot first pass over all entries. The native JavaScript wrapper lazily caches
+`PublicKey` objects returned by Zig. The steady-state benchmark runs after this first pass, so both caches
+return already-deserialized objects for indexed lookups.
+
+Cache population, `getIndex`, persistence, capacity management, and reset are outside the measured BLS path.
+The shared JavaScript aggregation cases isolate cache lookup overhead. The optimized native aggregation cases
+measure the changed end-to-end Lodestar beacon-node path.
 
 ## Results
 
