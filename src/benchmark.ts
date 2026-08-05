@@ -1,5 +1,4 @@
 import {performance} from "node:perf_hooks";
-import {aggregatePublicKeys} from "@chainsafe/lodestar-z/blst";
 import {Bench} from "tinybench";
 import {populateCaches, type BlsCache} from "./cacheSetup.js";
 import {generatePubkeys, indicesFor} from "./dataset.js";
@@ -48,13 +47,10 @@ bench.add("BLS indexed getOrThrow - Zig native", () => {
 
 for (const count of aggregateSizes) {
   const indices = indicesFor(count, cacheSize, 17);
-  bench.add(`BLS JS aggregate ${count} - TypeScript cache`, () => {
-    sink = aggregateViaJs(typescriptCache, indices);
+  bench.add(`BLS aggregatePublicKeys ${count} - TypeScript cache`, () => {
+    sink = typescriptCache.aggregate(indices);
   });
-  bench.add(`BLS JS aggregate ${count} - Zig native cache`, () => {
-    sink = aggregateViaJs(nativeCache, indices);
-  });
-  bench.add(`BLS native aggregate ${count} - Zig native cache`, () => {
+  bench.add(`BLS nativeCache.aggregate ${count} - Zig native cache`, () => {
     sink = nativeCache.aggregate(indices);
   });
 }
@@ -111,10 +107,6 @@ function makeMixedSignatureSets(size: number): SignatureSet[] {
     const count = index % 8 === 3 ? 32 : 128;
     return {type: "aggregate", indices: indicesFor(count, size, index * 97)};
   });
-}
-
-function aggregateViaJs(cache: BlsCache, indices: number[]): unknown {
-  return aggregatePublicKeys(indices.map((index) => cache.getOrThrow(index)));
 }
 
 function runMixedWorkload(cache: BlsCache, sets: SignatureSet[]): unknown {
