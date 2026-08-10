@@ -12,6 +12,7 @@ test("both caches return the same indexed public keys", () => {
 
   for (let index = 0; index < pubkeys.length; index++) {
     assert.deepEqual(nativeCache.getOrThrow(index).toBytes(), typescriptCache.getOrThrow(index).toBytes());
+    assert.deepEqual(nativeCache.getPubkeyBytes(index), typescriptCache.getOrThrow(index).toBytes());
   }
 });
 
@@ -19,7 +20,7 @@ test("both BLS paths return the same aggregate", () => {
   const pubkeys = generatePubkeys(256);
   const {nativeCache, typescriptCache} = populateCaches(pubkeys);
 
-  for (const count of [1, 32, 128]) {
+  for (const count of [1, 32, 128, 256]) {
     const indices = indicesFor(count, pubkeys.length, 7);
     assert.deepEqual(nativeCache.aggregate(indices).toBytes(), typescriptCache.aggregate(indices).toBytes());
   }

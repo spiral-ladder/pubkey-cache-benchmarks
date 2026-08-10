@@ -1,0 +1,4 @@
+# The CLI persists history through `git symbolic-ref`, which fails on a detached HEAD
+# (for example in a jj working copy). Do not persist history. Save results with
+# `pnpm bench | tee results/<date>.txt` instead.
+persist: false

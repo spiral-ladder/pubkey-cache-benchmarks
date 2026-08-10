@@ -1,3 +1,4 @@
 allowBuilds:
   "@chainsafe/lodestar-z": true
+  aws-sdk: set this to true or false
   esbuild: true
