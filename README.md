@@ -71,8 +71,8 @@ Sample output from my machine:
 ```
 Generating deterministic valid BLS public keys...
 {
-  node: 'v24.18.0',
-  platform: 'darwin-arm64',
+  node: 'v24.16.0',
+  platform: 'linux-x64',
   cacheSize: 16384,
   benchmarkTime: 1000,
   warmupTime: 250
@@ -80,28 +80,24 @@ Generating deterministic valid BLS public keys...
 ┌─────────┬──────────────┬──────────┬─────────────┐
 │ (index) │ cache        │ totalMs  │ nsPerLookup │
 ├─────────┼──────────────┼──────────┼─────────────┤
-│ 0       │ 'TypeScript' │ '1.681'  │ '102.6'     │
-│ 1       │ 'Zig native' │ '11.891' │ '725.8'     │
+│ 0       │ 'TypeScript' │ '2.042'  │ '124.6'     │
+│ 1       │ 'Zig native' │ '22.418' │ '1368.3'    │
 └─────────┴──────────────┴──────────┴─────────────┘
-┌─────────┬────────────────────────────────────────────────────┬───────────────────┬───────────────────┬────────────────────────┬────────────────────────┬──────────┐
-│ (index) │ Task name                                          │ Latency avg (ns)  │ Latency med (ns)  │ Throughput avg (ops/s) │ Throughput med (ops/s) │ Samples  │
-├─────────┼────────────────────────────────────────────────────┼───────────────────┼───────────────────┼────────────────────────┼────────────────────────┼──────────┤
-│ 0       │ 'BLS indexed getOrThrow - TypeScript'              │ '31.20 ± 0.02%'   │ '41.00 ± 1.00'    │ '26023218 ± 0.00%'     │ '24390243 ± 580719'    │ 32052958 │
-│ 1       │ 'BLS indexed getOrThrow - Zig native'              │ '70.26 ± 0.03%'   │ '83.00 ± 1.00'    │ '16161942 ± 0.02%'     │ '12048193 ± 143431'    │ 14232916 │
-│ 2       │ 'BLS indexed getOrThrow + toBytes - TypeScript'    │ '719.08 ± 3.17%'  │ '584.00 ± 1.00'   │ '1609906 ± 0.03%'      │ '1712329 ± 2937'       │ 1390670  │
-│ 3       │ 'BLS indexed getOrThrow + toBytes - Zig native'    │ '769.07 ± 2.09%'  │ '625.00 ± 41.00'  │ '1493843 ± 0.03%'      │ '1600000 ± 98498'      │ 1300276  │
-│ 4       │ 'BLS indexed getPubkeyBytes - Zig native'          │ '571.87 ± 2.44%'  │ '458.00 ± 41.00'  │ '2117966 ± 0.03%'      │ '2183406 ± 183406'     │ 1748635  │
-│ 5       │ 'BLS aggregatePublicKeys 1 - TypeScript cache'     │ '829.14 ± 12.24%' │ '667.00 ± 1.00'   │ '1470877 ± 0.02%'      │ '1499250 ± 2251'       │ 1206070  │
-│ 6       │ 'BLS nativeCache.aggregate 1 - Zig native cache'   │ '53.76 ± 0.04%'   │ '42.00 ± 1.00'    │ '20550558 ± 0.01%'     │ '23809524 ± 580720'    │ 18600664 │
-│ 7       │ 'BLS aggregatePublicKeys 32 - TypeScript cache'    │ '20083 ± 0.03%'   │ '20000 ± 83.00'   │ '49823 ± 0.02%'        │ '50000 ± 208'          │ 49793    │
-│ 8       │ 'BLS nativeCache.aggregate 32 - Zig native cache'  │ '17469 ± 0.03%'   │ '17417 ± 83.00'   │ '57290 ± 0.02%'        │ '57415 ± 272'          │ 57245    │
-│ 9       │ 'BLS aggregatePublicKeys 128 - TypeScript cache'   │ '77753 ± 1.55%'   │ '71875 ± 208.00'  │ '13662 ± 0.17%'        │ '13913 ± 40'           │ 12863    │
-│ 10      │ 'BLS nativeCache.aggregate 128 - Zig native cache' │ '62332 ± 0.58%'   │ '61292 ± 250.00'  │ '16216 ± 0.08%'        │ '16315 ± 67'           │ 16044    │
-│ 11      │ 'BLS aggregatePublicKeys 512 - TypeScript cache'   │ '281173 ± 0.04%'  │ '280334 ± 458.00' │ '3557 ± 0.03%'         │ '3567 ± 6'             │ 3557     │
-│ 12      │ 'BLS nativeCache.aggregate 512 - Zig native cache' │ '237644 ± 0.03%'  │ '237042 ± 375.00' │ '4208 ± 0.03%'         │ '4219 ± 7'             │ 4208     │
-│ 13      │ 'BLS mixed 32 signature sets - TypeScript'         │ '370281 ± 0.07%'  │ '368583 ± 1333.0' │ '2701 ± 0.06%'         │ '2713 ± 10'            │ 2701     │
-│ 14      │ 'BLS mixed 32 signature sets - Zig native'         │ '315691 ± 0.10%'  │ '315834 ± 3668.0' │ '3170 ± 0.09%'         │ '3166 ± 37'            │ 3168     │
-└─────────┴────────────────────────────────────────────────────┴───────────────────┴───────────────────┴────────────────────────┴────────────────────────┴──────────┘
+    ✔ BLS indexed getOrThrow - TypeScript                                  5263158 ops/s    190.0000 ns/op        -     815160 runs   1.00 s
+    ✔ BLS indexed getOrThrow - Zig native                                  4255319 ops/s    235.0000 ns/op        -     791887 runs   1.00 s
+    ✔ BLS indexed getOrThrow + toBytes - TypeScript                       474608.4 ops/s    2.107000 us/op        -     273294 runs   1.00 s
+    ✔ BLS indexed getOrThrow + toBytes - Zig native                       458715.6 ops/s    2.180000 us/op        -     269953 runs   1.00 s
+    ✔ BLS indexed getPubkeyBytes - Zig native                             554631.2 ops/s    1.803000 us/op        -     314441 runs   1.00 s
+    ✔ BLS aggregatePublicKeys 1 - TypeScript cache                        469483.6 ops/s    2.130000 us/op        -     258249 runs   1.00 s
+    ✔ BLS nativeCache.aggregate 1 - Zig native cache                       4761905 ops/s    210.0000 ns/op        -     845962 runs   1.00 s
+    ✔ BLS aggregatePublicKeys 32 - TypeScript cache                       37808.61 ops/s    26.44900 us/op        -      27792 runs   1.00 s
+    ✔ BLS nativeCache.aggregate 32 - Zig native cache                     46242.77 ops/s    21.62500 us/op        -      33270 runs   1.00 s
+    ✔ BLS aggregatePublicKeys 128 - TypeScript cache                      10596.14 ops/s    94.37400 us/op        -       7898 runs   1.00 s
+    ✔ BLS nativeCache.aggregate 128 - Zig native cache                    13808.53 ops/s    72.41900 us/op        -      10279 runs   1.00 s
+    ✔ BLS aggregatePublicKeys 512 - TypeScript cache                      2708.214 ops/s    369.2470 us/op        -       2028 runs   1.00 s
+    ✔ BLS nativeCache.aggregate 512 - Zig native cache                    3621.063 ops/s    276.1620 us/op        -       2709 runs   1.00 s
+    ✔ BLS mixed 32 signature sets - TypeScript                            2088.485 ops/s    478.8160 us/op        -       1563 runs   1.00 s
+    ✔ BLS mixed 32 signature sets - Zig native                            2664.492 ops/s    375.3060 us/op        -       1994 runs   1.00 s
 ```
 
 ## Methodology
