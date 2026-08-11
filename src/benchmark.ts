@@ -1,13 +1,12 @@
 import {performance} from "node:perf_hooks";
-import {beforeAll, bench, describe, setBenchOpts} from "@chainsafe/benchmark";
+import {beforeAll, bench, describe} from "@chainsafe/benchmark";
 import {type BlsCache, populateCaches} from "./cacheSetup.js";
 import {generatePubkeys, indicesFor} from "./dataset.js";
 import type {PubkeyCache} from "@chainsafe/lodestar-z/pubkeys";
 import type {TypeScriptPubkeyCache} from "./typescriptPubkeyCache.js";
 
 const cacheSize = readPositiveInteger("CACHE_SIZE", 16_384);
-const benchmarkTime = readPositiveInteger("BENCH_TIME", 1_000);
-const warmupTime = readPositiveInteger("WARMUP_TIME", 250);
+const lookupBatchSize = 4_096;
 // Aggregate sizes 1, 32, and 128 match Lodestar's existing BLS performance tests. Size 512
 // covers a full mainnet committee: 1M active validators / 32 slots / 64 committees per slot is
 // about 488 members per committee.
@@ -20,16 +19,6 @@ if (cacheSize < Math.max(...aggregateSizes)) {
 let sink: unknown;
 
 describe("pubkey cache", () => {
-  // Fixed measurement and warmup time per case. minMs == maxMs reproduces the fixed-time
-  // measurement of the previous tinybench setup; warmup is time-based only.
-  setBenchOpts({
-    minMs: benchmarkTime,
-    maxMs: benchmarkTime,
-    maxWarmUpMs: warmupTime,
-    // Time-based warmup only; the runner rejects Infinity here.
-    maxWarmUpRuns: Number.MAX_SAFE_INTEGER,
-  });
-
   let nativeCache!: PubkeyCache;
   let typescriptCache!: TypeScriptPubkeyCache;
 
@@ -42,8 +31,7 @@ describe("pubkey cache", () => {
       node: process.version,
       platform: `${process.platform}-${process.arch}`,
       cacheSize,
-      benchmarkTime,
-      warmupTime,
+      lookupBatchSize,
     });
 
     // append() leaves the native JavaScript object cache empty. This scan measures the
@@ -55,32 +43,62 @@ describe("pubkey cache", () => {
     assertEquivalent(nativeCache, typescriptCache);
   });
 
-  const lookupIndices = makeLookupSequence(cacheSize, 4_096);
+  const lookupIndices = makeLookupSequence(cacheSize, lookupBatchSize);
   let nativeLookupCursor = 0;
   let typescriptLookupCursor = 0;
   let nativeSerializeCursor = 0;
   let typescriptSerializeCursor = 0;
   let nativeBytesCursor = 0;
 
-  const nextLookupIndex = (cursor: number): number => lookupIndices[cursor % lookupIndices.length]!;
-
-  bench("BLS indexed getOrThrow - TypeScript", () => {
-    sink = typescriptCache.getOrThrow(nextLookupIndex(typescriptLookupCursor++));
+  bench({
+    id: "BLS indexed getOrThrow - TypeScript",
+    runsFactor: lookupBatchSize,
+    fn: () => {
+      for (let i = 0; i < lookupBatchSize; i++) {
+        sink = typescriptCache.getOrThrow(lookupIndices[typescriptLookupCursor++ % lookupIndices.length]!);
+      }
+    },
   });
-  bench("BLS indexed getOrThrow - Zig native", () => {
-    sink = nativeCache.getOrThrow(nextLookupIndex(nativeLookupCursor++));
+  bench({
+    id: "BLS indexed getOrThrow - Zig native",
+    runsFactor: lookupBatchSize,
+    fn: () => {
+      for (let i = 0; i < lookupBatchSize; i++) {
+        sink = nativeCache.getOrThrow(lookupIndices[nativeLookupCursor++ % lookupIndices.length]!);
+      }
+    },
   });
 
   // The BLS worker job path needs Uint8Array pubkeys, so the indexed hot path is really
   // getOrThrow() + toBytes(). Compare it with the direct getPubkeyBytes() native call.
-  bench("BLS indexed getOrThrow + toBytes - TypeScript", () => {
-    sink = typescriptCache.getOrThrow(nextLookupIndex(typescriptSerializeCursor++)).toBytes();
+  bench({
+    id: "BLS indexed getOrThrow + toBytes - TypeScript",
+    runsFactor: lookupBatchSize,
+    fn: () => {
+      for (let i = 0; i < lookupBatchSize; i++) {
+        sink = typescriptCache
+          .getOrThrow(lookupIndices[typescriptSerializeCursor++ % lookupIndices.length]!)
+          .toBytes();
+      }
+    },
   });
-  bench("BLS indexed getOrThrow + toBytes - Zig native", () => {
-    sink = nativeCache.getOrThrow(nextLookupIndex(nativeSerializeCursor++)).toBytes();
+  bench({
+    id: "BLS indexed getOrThrow + toBytes - Zig native",
+    runsFactor: lookupBatchSize,
+    fn: () => {
+      for (let i = 0; i < lookupBatchSize; i++) {
+        sink = nativeCache.getOrThrow(lookupIndices[nativeSerializeCursor++ % lookupIndices.length]!).toBytes();
+      }
+    },
   });
-  bench("BLS indexed getPubkeyBytes - Zig native", () => {
-    sink = nativeCache.getPubkeyBytes(nextLookupIndex(nativeBytesCursor++));
+  bench({
+    id: "BLS indexed getPubkeyBytes - Zig native",
+    runsFactor: lookupBatchSize,
+    fn: () => {
+      for (let i = 0; i < lookupBatchSize; i++) {
+        sink = nativeCache.getPubkeyBytes(lookupIndices[nativeBytesCursor++ % lookupIndices.length]!);
+      }
+    },
   });
 
   for (const count of aggregateSizes) {

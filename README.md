@@ -31,15 +31,14 @@ Run the benchmark with its default configuration:
 pnpm bench
 ```
 
-Use environment variables to change the workload:
+Use the `CACHE_SIZE` environment variable to change the workload:
 
 ```sh
-CACHE_SIZE=131072 BENCH_TIME=3000 WARMUP_TIME=1000 pnpm bench
+CACHE_SIZE=131072 pnpm bench
 ```
 
-- `CACHE_SIZE` defaults to `16384` and must be at least `512`.
-- `BENCH_TIME` is the measurement time per benchmark in milliseconds. It defaults to `1000`.
-- `WARMUP_TIME` is the warmup time per benchmark in milliseconds. It defaults to `250`.
+`CACHE_SIZE` defaults to `16384` and must be at least `512`. Configure benchmark timing and convergence
+in `.benchrc.yaml` or with `@chainsafe/benchmark` CLI options.
 
 To save a result, create the ignored results directory and pipe the output to `tee`:
 
@@ -74,8 +73,7 @@ Generating deterministic valid BLS public keys...
   node: 'v24.16.0',
   platform: 'linux-x64',
   cacheSize: 16384,
-  benchmarkTime: 1000,
-  warmupTime: 250
+  lookupBatchSize: 4096
 }
 ┌─────────┬──────────────┬──────────┬─────────────┐
 │ (index) │ cache        │ totalMs  │ nsPerLookup │
@@ -107,6 +105,8 @@ The benchmarks focus on the cache operations used to resolve Lodestar BLS signat
 - Indexed signature set: `getOrThrow(index)`.
 - Indexed signature set for the BLS worker: `getOrThrow(index)` + `toBytes()` compared with the
   native `getPubkeyBytes(index)`. The worker consumes `Uint8Array` pubkeys, not `PublicKey` objects.
+  Each indexed case runs 4,096 operations per benchmark invocation and sets `runsFactor` to 4,096.
+  This keeps the reported latency per operation while amortizing benchmark-runner overhead.
 - Old aggregate signature path: `indices.map(getOrThrow)` followed by `aggregatePublicKeys`.
 - New aggregate signature path: `nativeCache.aggregate(indices)`.
 - A mixed batch of 32 indexed and aggregate signature sets that compares the old TypeScript path with the
